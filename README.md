@@ -26,4 +26,8 @@ This stepts are for ASP.NET 6.0
 	- Authentication type: None
 	- Configure for HTTPS
 	- Do not use top-level statements
+
+2. Create a new **Class Library** project with these caracteristics:
+	- Project Name: DemoLibrary
+	- Framework: .NET 6.0 (Long-term support)
  
