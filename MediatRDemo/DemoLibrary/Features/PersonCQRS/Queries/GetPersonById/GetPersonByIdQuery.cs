@@ -1,12 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using DemoLibrary.Models;
+using MediatR;
 
 namespace DemoLibrary.Features.PersonCQRS.Queries.GetPersonById
 {
-    public class GetPersonByIdQuery
-    {
-    }
+    public record GetPersonByIdQuery(int id) : IRequest<PersonModel>;
+
+    //Classes version.
+    //public class GetPersonByIdClassQuery : IRequest<PersonModel>
+    //{
+    //    public int Id { get; set; }
+
+    //    public GetPersonByIdClassQuery(int id)
+    //    {
+    //        Id = id;
+    //    }
+    //}
 }

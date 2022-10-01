@@ -130,7 +130,7 @@ This stepts are for ASP.NET 6.0
 			}
 		}
 		``` 
-3. Implement MediatR into our Solution:
+4. Implement MediatR into our Solution:
 	1. Inside **class library DemoLibrary**
     	1. Add nuget package [MediatR](https://www.nuget.org/packages/MediatR/11.0.0?_src=template) 
 
@@ -199,7 +199,7 @@ This stepts are for ASP.NET 6.0
 		}
 		```
 	
-	1. Inside **project BlazorUI**
+	2. Inside **project BlazorUI**
     	1. Add nuget package [MediatR.Extensions.Microsoft.DependencyInjection](https://www.nuget.org/packages/MediatR.Extensions.Microsoft.DependencyInjection/11.0.0?_src=template) 
 
     	2. Add DataAccess dependent injection 
@@ -253,7 +253,7 @@ This stepts are for ASP.NET 6.0
 		}
 		``` 
 
-4. Change UI to API Project:
+5. Change UI to API Project:
 	1. Create a new **ASP.NET Core Web API** project with these caracteristics:
 		- Project Name: WebAPI
 		- Framework: .NET 6.0 (Long-term support)
@@ -313,3 +313,136 @@ This stepts are for ASP.NET 6.0
 		}
 	}
 	```
+
+6. Implement get person by id and insert a person method
+	1. Get person by id 
+		1. Inside **class library DemoLibrary**
+			1. Add classes to MediatR folder structure
+				1. To folder Features/PersonCSQR/Queries/GetPersonById 
+				```c#
+				namespace DemoLibrary.Features.PersonCQRS.Queries.GetPersonById
+				{
+					public record GetPersonByIdQuery(int id) : IRequest<PersonModel>;
+
+					//Classes version.
+					//public class GetPersonByIdClassQuery : IRequest<PersonModel>
+					//{
+					//    public int Id { get; set; }
+
+					//    public GetPersonByIdClassQuery(int id)
+					//    {
+					//        Id = id;
+					//    }
+					//}
+				}
+				```
+
+				2. To folder Features/PersonCSQR/Handlers  
+				```c#
+				namespace DemoLibrary.Features.PersonCQRS.Handlers
+				{
+					public class GetPersonByIdHandler : IRequestHandler<GetPersonByIdQuery, PersonModel>
+					{
+						private readonly IMediator _mediator;
+
+						public GetPersonByIdHandler(IMediator mediator)
+						{
+							_mediator = mediator;
+						}
+						public async Task<PersonModel> Handle(GetPersonByIdQuery request, CancellationToken cancellationToken)
+						{
+							var result = await _mediator.Send(new GetPersonListQuery());
+
+							var output = result.FirstOrDefault(x => x.Id == request.id);
+
+							return output;
+						}
+					}
+				}
+				```
+
+		2. Inside **project BlazorUI**
+			1. Add API Controller class 
+			```c#
+			namespace WebAPI.Controllers
+			{
+				[Route("api/[controller]")]
+				[ApiController]
+				public class PersonController : ControllerBase
+				{
+					....
+
+					// GET api/<PersonController>/5
+					[HttpGet("{id}")]
+					public async Task<PersonModel> Get(int id)
+					{
+						return await _mediator.Send(new GetPersonByIdQuery(id));
+					}
+				}
+			}
+		```
+
+	2. Insert person 
+		1. Inside **class library DemoLibrary**
+			1. Add classes to MediatR folder structure
+				1. To folder Features/PersonCSQR/Commands/InsertPerson
+				```c#
+				namespace DemoLibrary.Features.PersonCQRS.Commands.InsertPerson
+				{
+					public record InsertPersonCommand(string FirstName, string LaststName) : IRequest<PersonModel>;
+
+					//public class InsertPersonCommand : IRequest<PersonModel>
+					//{
+					//    public string FirstName { get; set; }
+					//    public string LaststName { get; set; }
+
+					//    public InsertPersonCommand(string firstName, string laststName)
+					//    {
+					//        FirstName = firstName;
+					//        LaststName = laststName;
+					//    }
+					//}
+				}
+				```
+
+				2. To folder Features/PersonCSQR/Handlers  
+				```c#
+				namespace DemoLibrary.Features.PersonCQRS.Handlers
+				{
+					public class InsertPersonHandler : IRequestHandler<InsertPersonCommand, PersonModel>
+					{
+						private readonly IDataAccess _data;
+
+						public InsertPersonHandler(IDataAccess data)
+						{
+							_data = data;
+						}
+						public Task<PersonModel> Handle(InsertPersonCommand request, CancellationToken cancellationToken)
+						{
+							return Task.FromResult(_data.InsertPerson(request.FirstName, request.LaststName));
+						}
+					}
+				}
+				```
+
+		2. Inside **project BlazorUI**
+			1. Add API Controller class 
+			```c#
+			namespace WebAPI.Controllers
+			{
+				[Route("api/[controller]")]
+				[ApiController]
+				public class PersonController : ControllerBase
+				{
+					....
+
+					// POST api/<PersonController>
+					[HttpPost]
+					public async Task<PersonModel> Post([FromBody] PersonModel person)
+					{
+						var model = new InsertPersonCommand(person.FirstName, person.LastName);
+						return await _mediator.Send(model);
+					}
+				}
+			}
+		```

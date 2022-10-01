@@ -1,4 +1,6 @@
-﻿using DemoLibrary.Features.PersonCQRS.Queries.GetAllPeople;
+﻿using DemoLibrary.Features.PersonCQRS.Commands.InsertPerson;
+using DemoLibrary.Features.PersonCQRS.Queries.GetAllPeople;
+using DemoLibrary.Features.PersonCQRS.Queries.GetPersonById;
 using DemoLibrary.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -30,15 +32,17 @@ namespace WebAPI.Controllers
 
         // GET api/<PersonController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<PersonModel> Get(int id)
         {
-            return "value";
+            return await _mediator.Send(new GetPersonByIdQuery(id));
         }
 
         // POST api/<PersonController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<PersonModel> Post([FromBody] PersonModel person)
         {
+            var model = new InsertPersonCommand(person.FirstName, person.LastName);
+            return await _mediator.Send(model);
         }
 
     }

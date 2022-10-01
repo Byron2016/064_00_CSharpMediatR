@@ -18,7 +18,7 @@ namespace WebAPI
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.AddTransient<IDataAccess, DemoDataAccess>();
+            builder.Services.AddSingleton<IDataAccess, DemoDataAccess>();
             //builder.Services.AddMediatR(typeof(DemoDataAccess).Assembly);
             builder.Services.AddMediatR(typeof(DemoLibraryMediatREntryPoint).Assembly);
 
