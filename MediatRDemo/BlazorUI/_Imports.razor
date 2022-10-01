@@ -10,3 +10,7 @@
 @using BlazorUI.Shared
 @using DemoLibrary.DataAccess
 @using DemoLibrary.Models
+@*Inject cqrs structure*@
+@using DemoLibrary.Features.PersonCQRS.Handlers
+@using DemoLibrary.Features.PersonCQRS.Commands.InsertPerson
+@using DemoLibrary.Features.PersonCQRS.Queries.GetAllPeople

@@ -1,5 +1,7 @@
 ﻿@page "/"
 
+@inject MediatR.IMediator _mediator
+
 <PageTitle>Index</PageTitle>
 
 <h1>We The People</h1>
@@ -14,11 +16,16 @@
 @code {
     List<PersonModel> people;
 
-    protected override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
         //get list of people
+        /*
         var demoDataAccess = new DemoDataAccess();
         people = demoDataAccess.GetPeople();
-        return base.OnInitializedAsync();
+        */
+
+        people = await _mediator.Send(new GetPersonListQuery());
+
+        //return base.OnInitializedAsync();
     }
 }

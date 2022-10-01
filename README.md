@@ -32,7 +32,7 @@ This stepts are for ASP.NET 6.0
 	- Framework: .NET 6.0 (Long-term support)
 
 3. Add Data Access layer and call from UI:
-    1. Inside class library DemoLibrary
+    1. Inside **class library DemoLibrary**
 		1. Inside folder Models add PersonModel model
 		```c#
 			namespace DemoLibrary.Models
@@ -94,7 +94,7 @@ This stepts are for ASP.NET 6.0
 		}
 		```
 
-    2. Inside project BlazorUI
+    2. Inside project **project BlazorUI**
 		1. Add a reference to class library DemoLibrary
 		2. Add usings to _Imports.razor
 		```c#
@@ -127,6 +127,128 @@ This stepts are for ASP.NET 6.0
 				var demoDataAccess = new DemoDataAccess();
 				people = demoDataAccess.GetPeople();
 				return base.OnInitializedAsync();
+			}
+		}
+		``` 
+3. Implement MediatR into our Solution:
+	1. Inside **class library DemoLibrary**
+    	1. Add nuget package [MediatR](https://www.nuget.org/packages/MediatR/11.0.0?_src=template) 
+
+		2. Build MediatR folder structure
+			1. Add CSQR folders structure
+				1. Features
+					1. PersonCSQR
+						1. Commands
+							1. InsertPerson
+						2. Queries
+							1. GetAllPeople
+							2. GetPersonById
+						3. Handlers 
+
+		3. Add classes to MediatR folder structure
+			1. To folder Features/PersonCSQR/Queries/GetAllPeople 
+			```c#
+			namespace DemoLibrary.Features.PersonCQRS.Queries.GetAllPeople
+			{
+				public record GetPersonListQuery() : IRequest<List<PersonModel>>;
+
+				//Classes version.
+				//public class GetPersonListClassQuery: IRequest<List<PersonModel>>
+				//{
+				//}
+			}
+			```
+
+			2. To folder Features/PersonCSQR/Queries/GetPersonById 
+			```c#
+
+			```
+
+			3. To folder Features/PersonCSQR/Commands/InsertPerson
+			```c#
+
+			```
+
+			4. To folder Features/PersonCSQR/Handlers  
+			```c#
+			namespace DemoLibrary.Features.PersonCQRS.Handlers
+			{
+				public class GetPersonListHandler : IRequestHandler<GetPersonListQuery, List<PersonModel>>
+				{
+					private readonly IDataAccess _data;
+
+					public GetPersonListHandler(IDataAccess data)
+					{
+						_data = data;
+					}
+					public Task<List<PersonModel>> Handle(GetPersonListQuery request, CancellationToken cancellationToken)
+					{
+						return Task.FromResult(_data.GetPeople());
+					}
+				}
+			}
+			```
+
+		4. Add class **DemoLibraryMediatREntryPoint**
+		```c#
+		namespace DemoLibrary
+		{
+			public class DemoLibraryMediatREntryPoint
+			{
+			}
+		}
+		```
+	
+	1. Inside **project BlazorUI**
+    	1. Add nuget package [MediatR.Extensions.Microsoft.DependencyInjection](https://www.nuget.org/packages/MediatR.Extensions.Microsoft.DependencyInjection/11.0.0?_src=template) 
+
+    	2. Add DataAccess dependent injection 
+		```c#
+		namespace BlazorUI
+		{
+			public class Program
+			{
+				public static void Main(string[] args)
+				{
+					....
+					builder.Services.AddTransient<IDataAccess, DemoDataAccess>();
+					//builder.Services.AddMediatR(typeof(DemoDataAccess).Assembly);
+					builder.Services.AddMediatR(typeof(DemoLibraryMediatREntryPoint).Assembly);
+					....
+				}
+			}
+		}
+		```
+
+    	3. Add usings to _Imports.razor
+		```c#
+		....
+		@using DemoLibrary.Features.PersonCQRS.Handlers
+		@using DemoLibrary.Features.PersonCQRS.Commands.InsertPerson
+		@using DemoLibrary.Features.PersonCQRS.Queries.GetAllPeople
+		``` 
+
+		4. Modify page Index.razor
+		```c#
+		@page "/"
+		@inject MediatR.IMediator _mediator
+
+		....
+
+		@code {
+			List<PersonModel> people;
+
+			protected override Task OnInitializedAsync()
+			{
+				//get list of people
+				/*
+				var demoDataAccess = new DemoDataAccess();
+				people = demoDataAccess.GetPeople();
+				*/
+
+				people = await _mediator.Send(new GetPersonListQuery());
+
+				//return base.OnInitializedAsync();
 			}
 		}
 		``` 
