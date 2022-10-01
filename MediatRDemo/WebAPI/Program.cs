@@ -1,3 +1,8 @@
+using DemoLibrary.DataAccess;
+using DemoLibrary.Interfaces;
+using DemoLibrary;
+using MediatR;
+
 namespace WebAPI
 {
     public class Program
@@ -12,6 +17,10 @@ namespace WebAPI
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            builder.Services.AddTransient<IDataAccess, DemoDataAccess>();
+            //builder.Services.AddMediatR(typeof(DemoDataAccess).Assembly);
+            builder.Services.AddMediatR(typeof(DemoLibraryMediatREntryPoint).Assembly);
 
             var app = builder.Build();
 

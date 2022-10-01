@@ -263,3 +263,53 @@ This stepts are for ASP.NET 6.0
 		- enable OpenAPI support
 		- Do not use top-level statements
 
+	2. Add a reference to **class library DemoLibrary**
+
+
+    3. Add nuget package [MediatR.Extensions.Microsoft.DependencyInjection](https://www.nuget.org/packages/MediatR.Extensions.Microsoft.DependencyInjection/11.0.0?_src=template) 
+
+	4. Add DataAccess dependent injection 
+	```c#
+	namespace BlazorUI
+	{
+		public class Program
+		{
+			public static void Main(string[] args)
+			{
+				....
+				builder.Services.AddTransient<IDataAccess, DemoDataAccess>();
+				//builder.Services.AddMediatR(typeof(DemoDataAccess).Assembly);
+				builder.Services.AddMediatR(typeof(DemoLibraryMediatREntryPoint).Assembly);
+				....
+			}
+		}
+	}
+	```
+
+	5. Add API Controller class 
+	```c#
+	namespace WebAPI.Controllers
+	{
+		[Route("api/[controller]")]
+		[ApiController]
+		public class PersonController : ControllerBase
+		{
+			private readonly IMediator _mediator;
+
+			public PersonController(IMediator mediator)
+			{
+				_mediator = mediator;
+			}
+			// GET: api/<PersonController>
+			[HttpGet]
+			public async Task<List<PersonModel>> Get()
+			{
+				List<PersonModel> people;
+
+				people = await _mediator.Send(new GetPersonListQuery());
+
+				return people;
+			}
+		}
+	}
+	```
