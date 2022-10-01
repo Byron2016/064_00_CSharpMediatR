@@ -252,3 +252,14 @@ This stepts are for ASP.NET 6.0
 			}
 		}
 		``` 
+
+4. Change UI to API Project:
+	1. Create a new **ASP.NET Core Web API** project with these caracteristics:
+		- Project Name: WebAPI
+		- Framework: .NET 6.0 (Long-term support)
+		- Authentication type: None
+		- Configure for HTTPS
+		- Use Controllers
+		- enable OpenAPI support
+		- Do not use top-level statements
+
