@@ -2,8 +2,23 @@
 
 <PageTitle>Index</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>We The People</h1>
 
-Welcome to your new app.
+<ul>
+    @foreach(var p in people)
+    {
+        <li>@p.Id @p.FirstName @p.LastName</li>
+    }
+</ul>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+@code {
+    List<PersonModel> people;
+
+    protected override Task OnInitializedAsync()
+    {
+        //get list of people
+        var demoDataAccess = new DemoDataAccess();
+        people = demoDataAccess.GetPeople();
+        return base.OnInitializedAsync();
+    }
+}

@@ -30,4 +30,103 @@ This stepts are for ASP.NET 6.0
 2. Create a new **Class Library** project with these caracteristics:
 	- Project Name: DemoLibrary
 	- Framework: .NET 6.0 (Long-term support)
- 
+
+3. Add Data Access layer and call from UI:
+    1. Inside class library DemoLibrary
+		1. Inside folder Models add PersonModel model
+		```c#
+			namespace DemoLibrary.Models
+			{
+				public class PersonModel
+				{
+					public int Id { get; set; }
+					public string? FirstName { get; set; }
+					public string? LastName { get; set; }
+				}
+			}
+		```
+
+		2. Inside folder Interfaces add IDataAccess interface
+		```c#
+		namespace DemoLibrary.Interfaces
+		{
+			public interface IDataAccess
+			{
+				List<PersonModel> GetPeople();
+				PersonModel InsertPerson(string firstName, string lastName);
+			}
+		}
+		```
+
+		3. Inside folder DataAccess add DemoDataAccess Class
+		```c#
+		namespace DemoLibrary.DataAccess
+		{
+			public class DemoDataAccess : IDataAccess
+			{
+				private List<PersonModel> _people = new();
+				public DemoDataAccess()
+				{
+					_people = Enumerable.Range(0, 20).Select(n =>
+					{
+						var p = new PersonModel()
+						{
+							Id = n,
+							FirstName = $"FirstName_{n}",
+							LastName = $"LastName_{n}",
+						};
+						return p;
+					}).ToList();
+				}
+
+				public List<PersonModel> GetPeople()
+				{
+					return _people;
+				}
+
+				public PersonModel InsertPerson(string firstName, string lastName)
+				{
+					PersonModel p = new() { FirstName = firstName, LastName = lastName };
+					p.Id = _people.Max(x => x.Id) + 1;
+					return p;
+				}
+			}
+		}
+		```
+
+    2. Inside project BlazorUI
+		1. Add a reference to class library DemoLibrary
+		2. Add usings to _Imports.razor
+		```c#
+		....
+		@using DemoLibrary.DataAccess
+		@using DemoLibrary.Models
+		``` 
+
+		3. Modify page Index.razor
+		```c#
+		@page "/"
+
+		<PageTitle>Index</PageTitle>
+
+		<h1>We The People</h1>
+
+		<ul>
+			@foreach(var p in people)
+			{
+				<li>@p.Id @p.FirstName @p.LastName</li>
+			}
+		</ul>
+
+		@code {
+			List<PersonModel> people;
+
+			protected override Task OnInitializedAsync()
+			{
+				//get list of people
+				var demoDataAccess = new DemoDataAccess();
+				people = demoDataAccess.GetPeople();
+				return base.OnInitializedAsync();
+			}
+		}
+		``` 
